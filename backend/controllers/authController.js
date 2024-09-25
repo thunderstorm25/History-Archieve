@@ -11,44 +11,41 @@ exports.register = async (req, res) => {
       return res.status(400).json({ message: 'Username already exists' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = await User.create({ username, password });
 
-    const newUser = await User.create({
-      username,
-      password: hashedPassword,
-      role: 'user' 
-    });
-
-    const token = jwt.sign({ id: newUser.id, role: newUser.role }, process.env.JWT_SECRET, {
-      expiresIn: '1h'
-    });
-
-    res.status(201).json({ token, role: newUser.role });
-  } catch (err) {
-    console.error('Error during registration:', err);
+    res.status(201).json({ message: 'User registered successfully', user: newUser });
+  } catch (error) {
+    console.error('Error during registration:', error);
     res.status(500).json({ message: 'Registration failed. Please try again later.' });
   }
 };
 
 
 exports.login = async (req, res) => {
+  const { username, password } = req.body;
+
   try {
-    const { username, password } = req.body;
+    // Find the user by username
     const user = await User.findOne({ where: { username } });
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({ message: 'Invalid password' });
+    // Check if the password matches
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token, role: user.role });
+    // Create a token
+    const token = jwt.sign({ id: user.id, role: user.role_id }, 'your_jwt_secret', { expiresIn: '1h' });
+
+    // Send back token and user role (admin or regular user)
+    res.json({ token, role: user.role_id });
   } catch (err) {
-    console.error('Login error:', err);
-    res.status(500).json({ message: 'Login failed. Try again.' });
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
   }
 };
+

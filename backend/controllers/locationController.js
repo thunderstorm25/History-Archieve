@@ -1,3 +1,4 @@
+// controllers/locationController.js
 const Location = require('../models/Location');
 
 exports.addLocation = async (req, res) => {
@@ -11,8 +12,15 @@ exports.addLocation = async (req, res) => {
 
 exports.updateLocation = async (req, res) => {
   try {
-    const location = await Location.update(req.body, { where: { id: req.params.id } });
-    res.status(200).json(location);
+    const [rowsUpdated, [updatedLocation]] = await Location.update(req.body, {
+      where: { id: req.params.id },
+      returning: true
+    });
+    if (rowsUpdated) {
+      res.status(200).json(updatedLocation);
+    } else {
+      res.status(404).json({ message: 'Location not found' });
+    }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

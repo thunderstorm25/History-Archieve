@@ -1,28 +1,34 @@
 const express = require('express');
-const sequelize = require('./config/db');
-require('dotenv').config();
+const bodyParser = require('body-parser');
+const cors = require('cors');
 
+// Import your routes
+const authRoutes = require('./routes/authRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
+const historicalDetailRoutes = require('./routes/historicalDetailRoutes');
 const locationRoutes = require('./routes/locationRoutes');
 const monumentRoutes = require('./routes/monumentRoutes');
-const historicalDetailRoutes = require('./routes/historicalDetailRoutes');
-const authRoutes = require('./routes/authRoutes');
 
+// Initialize express
 const app = express();
-app.use(express.json());
 
-app.use('/api/category', categoryRoutes);
-app.use('/api/location', locationRoutes);
-app.use('/api/monument', monumentRoutes);
-app.use('/api/historical', historicalDetailRoutes);
+// Middleware
+app.use(bodyParser.json());
+app.use(cors({
+  origin: 'http://localhost:3001', // Set your allowed client origin
+}));
+
+// Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/historical-details', historicalDetailRoutes);
+app.use('/api/locations', locationRoutes);
+app.use('/api/monuments', monumentRoutes);
 
-const PORT = process.env.PORT || 3000;
+// Default port (you can set any default port you want)
+const PORT = 3000;
 
-sequelize.sync().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
-}).catch(err => {
-  console.error('Unable to connect to the database:', err);
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

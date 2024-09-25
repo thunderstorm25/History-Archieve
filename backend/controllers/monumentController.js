@@ -1,3 +1,4 @@
+// controllers/monumentController.js
 const Monument = require('../models/Monument');
 
 exports.addMonument = async (req, res) => {
@@ -11,8 +12,15 @@ exports.addMonument = async (req, res) => {
 
 exports.updateMonument = async (req, res) => {
   try {
-    const monument = await Monument.update(req.body, { where: { id: req.params.id } });
-    res.status(200).json(monument);
+    const [rowsUpdated, [updatedMonument]] = await Monument.update(req.body, {
+      where: { id: req.params.id },
+      returning: true
+    });
+    if (rowsUpdated) {
+      res.status(200).json(updatedMonument);
+    } else {
+      res.status(404).json({ message: 'Monument not found' });
+    }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
