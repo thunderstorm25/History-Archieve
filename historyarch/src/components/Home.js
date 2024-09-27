@@ -4,33 +4,26 @@ import { useNavigate } from 'react-router-dom';
 const Home = () => {
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    navigate('/login');
-  };
-
-  const handleRegister = () => {
-    navigate('/register');
+  const handleBrowse = () => {
+    navigate('/user'); // Navigate to the user dashboard or browse page
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-md">
-        <h1 className="text-3xl font-bold text-blue-600 mb-6">Welcome to Monument Archive</h1>
-        <p className="text-gray-600 mb-6">Explore historical monuments and archives. Please login or register to continue.</p>
-        <div className="space-x-4">
-          <button 
-            onClick={handleLogin}
-            className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-500 transition duration-300"
-          >
-            Login
-          </button>
-          <button 
-            onClick={handleRegister}
-            className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-500 transition duration-300"
-          >
-            Register
-          </button>
-        </div>
+        <h1 className="text-3xl font-bold text-blue-600 mb-4">Welcome to Monument Archive</h1>
+        <p className="text-gray-600 mb-6">
+          Discover and explore historical monuments and archives. 
+        </p>
+        <button 
+          onClick={handleBrowse}
+          className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-500 transition duration-300"
+        >
+          Browse Monuments 
+        </button>
+        <p className="text-gray-500 mt-4">
+          Need to <span className="font-semibold cursor-pointer" onClick={() => navigate('/login')}>login</span> !!! you can do it here.
+        </p>
       </div>
     </div>
   );
