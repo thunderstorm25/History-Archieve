@@ -1,4 +1,6 @@
 const Monument = require('../models/Monument');
+const { Op } = require('sequelize');
+
 
 exports.addMonument = async (req, res) => {
   try {
@@ -55,6 +57,41 @@ exports.getMonuments = async (req, res) => {
     res.status(200).json(monuments);
   } catch (error) {
     console.error('Error fetching monuments:', error); // Log error for debugging
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+exports.searchMonuments = async (req, res) => {
+  try {
+    const searchTerm = req.query.name; // Get the search term from query parameters
+    const monuments = await Monument.findAll({
+      where: {
+        mon_name: {
+          [Op.like]: `%${searchTerm}%` // Use the LIKE operator for searching
+        }
+      }
+    });
+    res.status(200).json(monuments);
+  } catch (error) {
+    console.error('Error searching monuments:', error); // Log error for debugging
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.filterByConstructionYear = async (req, res) => {
+  try {
+    const { minYear, maxYear } = req.query; // Get minYear and maxYear from query parameters
+    const monuments = await Monument.findAll({
+      where: {
+        construction_year: {
+          [Op.between]: [minYear, maxYear] // Use the 'between' operator for filtering
+        }
+      }
+    });
+    res.status(200).json(monuments);
+  } catch (error) {
+    console.error('Error filtering monuments by construction year:', error);
     res.status(500).json({ error: error.message });
   }
 };

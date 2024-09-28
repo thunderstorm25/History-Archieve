@@ -15,6 +15,7 @@ const MonumentForm = () => {
   const [message, setMessage] = useState('');
   const [selectedMonumentId, setSelectedMonumentId] = useState(null);
   const [monuments, setMonuments] = useState([]);
+  const [searchTerm, setSearchTerm] = useState(''); // New state for search term
 
   useEffect(() => {
     fetchMonuments();
@@ -29,38 +30,40 @@ const MonumentForm = () => {
     }
   };
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.get(`http://localhost:3000/api/monuments/search?name=${searchTerm}`);
+      setMonuments(response.data); // Update monuments with search results
+    } catch (error) {
+      console.log('Error searching monuments', error);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (selectedMonumentId) {
-      await handleUpdate(selectedMonumentId);
-    } else {
-      await handleAdd();
-    }
-  };
-
-  const handleAdd = async () => {
     try {
-      await axios.post('http://localhost:3000/api/monuments/add', formData);
-      setMessage('Monument added successfully!');
-      resetForm();
+      if (selectedMonumentId) {
+        await axios.put(`http://localhost:3000/api/monuments/${selectedMonumentId}`, formData);
+        setMessage('Monument updated successfully');
+      } else {
+        await axios.post('http://localhost:3000/api/monuments', formData);
+        setMessage('Monument added successfully');
+      }
       fetchMonuments();
+      setFormData({
+        mon_name: '',
+        mon_description: '',
+        category_id: '',
+        location_id: '',
+        construction_year: '',
+        architect: '',
+        image_url: ''
+      });
+      setSelectedMonumentId(null);
     } catch (error) {
-      setMessage('Error adding monument. Please try again.');
-    }
-  };
-
-  const handleUpdate = async (id) => {
-    try {
-      await axios.put(`http://localhost:3000/api/monuments/update/${id}`, formData);
-      setMessage('Monument updated successfully!');
-      resetForm();
-      fetchMonuments();
-    } catch (error) {
-      setMessage('Error updating monument. Please try again.');
+      console.log('Error submitting form', error);
+      setMessage('Error submitting form');
     }
   };
 
@@ -79,25 +82,13 @@ const MonumentForm = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:3000/api/monuments/delete/${id}`);
-      setMessage('Monument deleted successfully!');
+      await axios.delete(`http://localhost:3000/api/monuments/${id}`);
       fetchMonuments();
+      setMessage('Monument deleted successfully');
     } catch (error) {
-      setMessage('Error deleting monument. Please try again.');
+      console.log('Error deleting monument', error);
+      setMessage('Error deleting monument');
     }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      mon_name: '',
-      mon_description: '',
-      category_id: '',
-      location_id: '',
-      construction_year: '',
-      architect: '',
-      image_url: ''
-    });
-    setSelectedMonumentId(null);
   };
 
   return (
@@ -115,7 +106,7 @@ const MonumentForm = () => {
                 type="text"
                 name="mon_name"
                 value={formData.mon_name}
-                onChange={handleChange}
+                onChange={(e) => setFormData({ ...formData, mon_name: e.target.value })}
                 required
                 className="mt-1 block w-full p-2 border border-stone-900 rounded-md transition duration-300"
               />
@@ -127,7 +118,7 @@ const MonumentForm = () => {
                 type="number"
                 name="construction_year"
                 value={formData.construction_year}
-                onChange={handleChange}
+                onChange={(e) => setFormData({ ...formData, construction_year: e.target.value })}
                 className="mt-1 block w-full p-2 border border-stone-900 rounded-md transition duration-300"
               />
             </label>
@@ -138,7 +129,7 @@ const MonumentForm = () => {
                 type="text"
                 name="category_id"
                 value={formData.category_id}
-                onChange={handleChange}
+                onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
                 required
                 className="mt-1 block w-full p-2 border border-stone-900 rounded-md transition duration-300"
               />
@@ -150,7 +141,7 @@ const MonumentForm = () => {
                 type="text"
                 name="location_id"
                 value={formData.location_id}
-                onChange={handleChange}
+                onChange={(e) => setFormData({ ...formData, location_id: e.target.value })}
                 required
                 className="mt-1 block w-full p-2 border border-stone-900 rounded-md transition duration-300"
               />
@@ -162,7 +153,7 @@ const MonumentForm = () => {
                 type="text"
                 name="architect"
                 value={formData.architect}
-                onChange={handleChange}
+                onChange={(e) => setFormData({ ...formData, architect: e.target.value })}
                 className="mt-1 block w-full p-2 border border-stone-900 rounded-md transition duration-300"
               />
             </label>
@@ -173,7 +164,7 @@ const MonumentForm = () => {
                 type="text"
                 name="image_url"
                 value={formData.image_url}
-                onChange={handleChange}
+                onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
                 className="mt-1 block w-full p-2 border border-stone-900 rounded-md transition duration-300"
               />
             </label>
@@ -183,7 +174,7 @@ const MonumentForm = () => {
               <textarea
                 name="mon_description"
                 value={formData.mon_description}
-                onChange={handleChange}
+                onChange={(e) => setFormData({ ...formData, mon_description: e.target.value })}
                 required
                 className="mt-1 block w-full p-2 border border-stone-900 rounded-md transition duration-300"
               />
@@ -199,9 +190,28 @@ const MonumentForm = () => {
           {message && <p className="text-green-600 mt-4">{message}</p>}
         </div>
 
-        {/* List Section */}
+        {/* Search and List Section */}
         <div className="mr-10 bg-blue-100 p-6 rounded-lg shadow-md">
           <h3 className="text-2xl font-semibold text-gray-700 mb-4">Monuments List</h3>
+
+          {/* Search Section */}
+          <form onSubmit={handleSearch} className="mb-4">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search for a monument..."
+              className="p-2 border border-stone-900 rounded-md"
+            />
+            <button
+              type="submit"
+              className="ml-2 p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300"
+            >
+              Search
+            </button>
+          </form>
+
+          {/* Monuments List */}
           <ul className="space-y-4">
             {monuments.map((monument) => (
               <li key={monument.id} className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center">

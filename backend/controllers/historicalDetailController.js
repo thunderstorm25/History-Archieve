@@ -1,5 +1,8 @@
 const HistoricalDetail = require('../models/HistoricalDetail');
+const { Monument } = require('../models/Monument');
+const { Op } = require('sequelize');
 
+// Add a historical detail (Admin)
 exports.addHistoricalDetail = async (req, res) => {
   try {
     const { monument_id, event_name, event_date, details } = req.body;
@@ -11,6 +14,7 @@ exports.addHistoricalDetail = async (req, res) => {
   }
 };
 
+// Update a historical detail (Admin)
 exports.updateHistoricalDetail = async (req, res) => {
   try {
     const { event_name, event_date, details } = req.body;
@@ -32,6 +36,7 @@ exports.updateHistoricalDetail = async (req, res) => {
   }
 };
 
+// Delete a historical detail (Admin)
 exports.deleteHistoricalDetail = async (req, res) => {
   try {
     const deletedRows = await HistoricalDetail.destroy({ where: { id: req.params.id } });
@@ -46,6 +51,7 @@ exports.deleteHistoricalDetail = async (req, res) => {
   }
 };
 
+// Get all historical details (User/Admin)
 exports.getHistoricalDetails = async (req, res) => {
   try {
     const details = await HistoricalDetail.findAll();
