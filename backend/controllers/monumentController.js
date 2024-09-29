@@ -1,4 +1,7 @@
 const Monument = require('../models/Monument');
+const Category = require('../models/Category');
+const Location = require('../models/Location');
+
 const { Op } = require('sequelize');
 
 
@@ -79,19 +82,34 @@ exports.searchMonuments = async (req, res) => {
   }
 };
 
-exports.filterByConstructionYear = async (req, res) => {
+
+exports.filter = async (req, res) => {
+  const { minYear, maxYear, location_id, category_id } = req.query; // Change here
+  
   try {
-    const { minYear, maxYear } = req.query; // Get minYear and maxYear from query parameters
     const monuments = await Monument.findAll({
       where: {
         construction_year: {
-          [Op.between]: [minYear, maxYear] // Use the 'between' operator for filtering
-        }
-      }
+          [Op.between]: [minYear, maxYear]
+        },
+        ...(location_id && { location_id }), // Filter by location if provided
+      },
+      include: [
+        {
+          model: Category,
+          ...(category_id && { where: { id: category_id } }), // Change here to filter by category ID
+          attributes: ['name'],
+        },
+        {
+          model: Location,
+          attributes: ['name'],
+        },
+      ]
     });
+
     res.status(200).json(monuments);
   } catch (error) {
-    console.error('Error filtering monuments by construction year:', error);
-    res.status(500).json({ error: error.message });
+    console.error('Error filtering monuments:', error);
+    res.status(500).json({ message: 'Error filtering monuments' });
   }
 };
