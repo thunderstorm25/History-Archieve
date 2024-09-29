@@ -3,83 +3,56 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 
 const UserDashboard = () => {
-  const [minYear, setMinYear] = useState(1800);
-  const [maxYear, setMaxYear] = useState(2040);
+  const [minYear, setMinYear] = useState(1400);
+  const [maxYear, setMaxYear] = useState(2050);
   const [monuments, setMonuments] = useState([]);
   const [locations, setLocations] = useState([]);
-  const [categories, setCategories] = useState([]); // State for categories
+  const [categories, setCategories] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState(''); // State for selected category
-  const [loading, setLoading] = useState(false); // Loading state
-  const [error, setError] = useState(''); // Error message
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   // Fetch monuments by default
   const fetchMonuments = async () => {
     try {
-      setLoading(true); // Set loading to true when fetching
       const response = await axios.get('http://localhost:3000/api/monuments/filter');
       setMonuments(response.data);
-      setError(''); // Clear error on successful fetch
     } catch (error) {
-      setError('Error fetching monuments. Please try again.'); // Set error message
       console.error('Error fetching monuments:', error);
-    } finally {
-      setLoading(false); // Set loading to false after fetch
     }
   };
 
-  // Fetch locations for filters
-  const fetchLocations = async () => {
+  // Fetch locations and categories for filters
+  const fetchFilters = async () => {
     try {
       const locationsResponse = await axios.get('http://localhost:3000/api/locations/all');
+      const categoriesResponse = await axios.get('http://localhost:3000/api/categories/all');
       setLocations(locationsResponse.data);
-      setError(''); // Clear error on successful fetch
-    } catch (error) {
-      setError('Error fetching locations. Please try again.'); // Set error message
-      console.error('Error fetching locations:', error);
-    }
-  };
-
-  // Fetch categories for filters
-  const fetchCategories = async () => {
-    try {
-      const categoriesResponse = await axios.get('http://localhost:3000/api/categories/all'); // Update with your endpoint
       setCategories(categoriesResponse.data);
-      setError(''); // Clear error on successful fetch
     } catch (error) {
-      setError('Error fetching categories. Please try again.'); // Set error message
-      console.error('Error fetching categories:', error);
+      console.error('Error fetching filters:', error);
     }
   };
 
   // Handle filter search
   const handleSearch = async () => {
     try {
-      console.log('Filter Params:', { minYear, maxYear, location_id: selectedLocation, category_id: selectedCategory });
-      setLoading(true); // Set loading to true when fetching
       const response = await axios.get('http://localhost:3000/api/monuments/filter', {
-        params: {
-          minYear,
-          maxYear,
-          location_id: selectedLocation,
-          category_id: selectedCategory // Ensure you're sending category ID
+        params: { 
+          minYear, 
+          maxYear, 
+          location_id: selectedLocation, 
+          category_id: selectedCategory 
         }
       });
       setMonuments(response.data);
-      setError(''); // Clear error on successful fetch
     } catch (error) {
-      setError('Error fetching filtered monuments. Please try again.'); // Set error message
-      console.error('Error fetching filtered monuments:', error);
-    } finally {
-      setLoading(false); // Set loading to false after fetch
+      console.error('Error fetching monuments:', error);
     }
   };
-  
 
   useEffect(() => {
     fetchMonuments();
-    fetchLocations();
-    fetchCategories(); // Fetch categories on component mount
+    fetchFilters();
   }, []);
 
   return (
@@ -95,30 +68,32 @@ const UserDashboard = () => {
         <div className="w-1/4 pr-6">
           <h2 className="text-2xl font-semibold mb-6">Filter Monuments</h2>
 
-          {/* Year Range Filter */}
+          {/* Year Filters */}
           <div className="mb-4">
             <h3 className="text-lg font-semibold">By Construction Year</h3>
-            <div className="flex items-center space-x-4">
-              <div>
-                <label htmlFor="minYear" className="block text-sm font-semibold">Min Year</label>
+            <div className="flex items-center mb-4 space-x-4">
+              <div className="flex flex-col">
+                <label className="mb-1" htmlFor="minYear">Min Year</label>
                 <input
                   type="number"
                   id="minYear"
-                  className="border p-2 rounded w-full"
                   value={minYear}
                   onChange={(e) => setMinYear(e.target.value)}
-                  placeholder="Min Year"
+                  className="border p-2 rounded"
+                  min="0"
+                  max="3000"
                 />
               </div>
-              <div>
-                <label htmlFor="maxYear" className="block text-sm font-semibold">Max Year</label>
+              <div className="flex flex-col">
+                <label className="mb-1" htmlFor="maxYear">Max Year</label>
                 <input
                   type="number"
                   id="maxYear"
-                  className="border p-2 rounded w-full"
                   value={maxYear}
                   onChange={(e) => setMaxYear(e.target.value)}
-                  placeholder="Max Year"
+                  className="border p-2 rounded"
+                  min="0"
+                  max="3000"
                 />
               </div>
             </div>
@@ -141,7 +116,7 @@ const UserDashboard = () => {
             </select>
           </div>
 
-          {/* Category Name Filter */}
+          {/* Category Filter */}
           <div className="mb-4">
             <h3 className="text-lg font-semibold">By Category</h3>
             <select
@@ -161,12 +136,9 @@ const UserDashboard = () => {
           <button
             className="bg-blue-600 text-white p-2 rounded w-full hover:bg-blue-700 transition duration-200"
             onClick={handleSearch}
-            disabled={loading} // Disable button while loading
           >
-            {loading ? 'Applying Filters...' : 'Apply Filters'} {/* Change button text while loading */}
+            Apply Filters
           </button>
-
-          {error && <p className="text-red-500 mt-4">{error}</p>} {/* Display error message */}
         </div>
 
         {/* Main Content for monuments */}

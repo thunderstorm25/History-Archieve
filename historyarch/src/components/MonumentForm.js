@@ -30,6 +30,8 @@ const MonumentForm = () => {
     }
   };
 
+  
+
   const handleSearch = async (e) => {
     e.preventDefault();
     try {
@@ -44,10 +46,10 @@ const MonumentForm = () => {
     e.preventDefault();
     try {
       if (selectedMonumentId) {
-        await axios.put(`http://localhost:3000/api/monuments/${selectedMonumentId}`, formData);
+        await axios.put(`http://localhost:3000/api/monuments/update/${selectedMonumentId}`, formData);
         setMessage('Monument updated successfully');
       } else {
-        await axios.post('http://localhost:3000/api/monuments', formData);
+        await axios.post('http://localhost:3000/api/monuments/add', formData);
         setMessage('Monument added successfully');
       }
       fetchMonuments();
@@ -66,6 +68,7 @@ const MonumentForm = () => {
       setMessage('Error submitting form');
     }
   };
+  
 
   const handleEditClick = (monument) => {
     setSelectedMonumentId(monument.id);
@@ -82,7 +85,7 @@ const MonumentForm = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:3000/api/monuments/${id}`);
+      await axios.delete(`http://localhost:3000/api/monuments/delete/${id}`);
       fetchMonuments();
       setMessage('Monument deleted successfully');
     } catch (error) {
