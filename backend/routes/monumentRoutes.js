@@ -5,7 +5,7 @@ const {
   deleteMonument, 
   getMonuments, 
   searchMonuments, 
-  filterByConstructionYear 
+  filter
 } = require('../controllers/monumentController');
 
 const router = express.Router();
@@ -19,6 +19,6 @@ router.get('/all', getMonuments);  // User/Admin: View all monuments
 router.get('/search', searchMonuments);  // User/Admin: Search monuments by name
 
 // New Route: Filter monuments by construction year
-router.get('/filter-by-year', filterByConstructionYear);  // User/Admin: Filter by construction year range
+router.get('/filter', filter);  // User/Admin: Filter by construction year range
 
 module.exports = router;
