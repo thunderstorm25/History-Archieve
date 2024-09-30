@@ -1,5 +1,5 @@
 const HistoricalDetail = require('../models/HistoricalDetail');
-const { Monument } = require('../models/Monument');
+const Monument = require('../models/Monument');
 const { Op } = require('sequelize');
 
 // Add a historical detail (Admin)
@@ -59,5 +59,27 @@ exports.getHistoricalDetails = async (req, res) => {
   } catch (error) {
     console.error('Error fetching historical details:', error);
     res.status(500).json({ error: 'Failed to fetch historical details' });
+  }
+};
+
+
+exports.getHistoricalDetailsByMonument = async (req, res) => {
+  try {
+    const monumentId = req.body.monumentId;  // Check that you are receiving this correctly
+    console.log("Received monumentId:", monumentId);  // Log to verify
+    
+    const historicalDetails = await HistoricalDetail.findAll({
+      where: { monument_id: monumentId },  // Ensure this matches your database schema
+      include: [{ model: Monument }] // Check association with Monument
+    });
+    
+    if (historicalDetails.length === 0) {
+      return res.status(404).json({ message: 'No historical details found for this monument' });
+    }
+
+    res.status(200).json(historicalDetails);
+  } catch (error) {
+    console.error('Error fetching historical details:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
