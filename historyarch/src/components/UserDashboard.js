@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const UserDashboard = () => {
   const [minYear, setMinYear] = useState(1000);
@@ -10,8 +10,8 @@ const UserDashboard = () => {
   const [categories, setCategories] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [historicalDetails, setHistoricalDetails] = useState({});
-  const [showHistoricalDetails, setShowHistoricalDetails] = useState(null);
+
+  const navigate = useNavigate();
 
   // Fetch monuments by default
   const fetchMonuments = async () => {
@@ -52,18 +52,9 @@ const UserDashboard = () => {
     }
   };
 
-  // Fetch historical details for a monument
-  const fetchHistoricalDetails = async (monumentId) => {
-    try {
-      const response = await axios.post(`http://localhost:3000/api/historical-details/historical-details`,{monumentId});
-      setHistoricalDetails((prevDetails) => ({
-        ...prevDetails,
-        [monumentId]: response.data,
-      }));
-      setShowHistoricalDetails(monumentId); 
-    } catch (error) {
-      console.error('Error fetching historical details:', error);
-    }
+  // Navigate to historical details page for a monument
+  const viewHistoricalDetails = (monumentId) => {
+    navigate(`/historical-details/${monumentId}`);
   };
 
   useEffect(() => {
@@ -175,28 +166,10 @@ const UserDashboard = () => {
 
                     <button
                       className="bg-green-600 text-white p-2 rounded mt-2 hover:bg-green-700 transition duration-200"
-                      onClick={() => fetchHistoricalDetails(monument.id)}
+                      onClick={() => viewHistoricalDetails(monument.id)}
                     >
                       View Historical Details
                     </button>
-
-                    {/* Display historical details for the selected monument */}
-                    {showHistoricalDetails === monument.id && (
-                      <div className="historical-details mt-4">
-                        <h4 className="text-lg font-bold">Historical Details:</h4>
-                        {historicalDetails[monument.id]?.length > 0 ? (
-                          <ul>
-                            {historicalDetails[monument.id].map((detail) => (
-                              <li key={detail.id} className="text-gray-700">
-                                <strong>{detail.event_name}:</strong> {detail.details} ({detail.event_date})
-                              </li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p className="text-gray-500">No historical details available for this monument.</p>
-                        )}
-                      </div>
-                    )}
                   </div>
                 </div>
               ))

@@ -1,7 +1,7 @@
 const { Sequelize } = require('sequelize');
 
 // Database configuration (hardcoded here)
-const sequelize = new Sequelize('MonumentArchive', 'root', 'isaac2004', {
+const sequelize = new Sequelize('MonumentArchive', 'root', 'admin', {
   host: 'localhost',
   dialect: 'mysql',
   logging: false, // Disable logging for cleaner output

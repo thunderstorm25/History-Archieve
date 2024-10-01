@@ -10,6 +10,7 @@ import CategoryForm from './components/CategoryForm';
 import LocationForm from './components/LocationForm';
 import MonumentForm from './components/MonumentForm';
 import HistoricalDetailForm from './components/HistoricalDetailForm';
+import HistoricalDetailsPage from './components/HistoricalDetailsPage';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
         <Route path="/admin/location" element={<LocationForm />} />
         <Route path="/admin/monument" element={<MonumentForm />} />
         <Route path="/admin/historical-details" element={<HistoricalDetailForm />} />
+        <Route path="/historical-details/:monumentId" element={<HistoricalDetailsPage />} />
 
         <Route
           path="/user"
