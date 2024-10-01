@@ -1,6 +1,7 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Papa from 'papaparse';  // Importing the papaparse library
 
 const UserDashboard = () => {
   const [minYear, setMinYear] = useState(1000);
@@ -55,6 +56,30 @@ const UserDashboard = () => {
   // Navigate to historical details page for a monument
   const viewHistoricalDetails = (monumentId) => {
     navigate(`/historical-details/${monumentId}`);
+  };
+
+  // Convert monument data to CSV
+  const exportToCSV = () => {
+    const csvData = monuments.map((monument) => ({
+      Name: monument.mon_name,
+      'Construction Year': monument.construction_year,
+      Architect: monument.architect,
+      Description: monument.mon_description,
+      Location: monument.Location.name,
+      Category: monument.Category.name,
+    }));
+
+    const csv = Papa.unparse(csvData);  // Convert JSON to CSV format
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'monuments.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   useEffect(() => {
@@ -151,7 +176,7 @@ const UserDashboard = () => {
         {/* Main Content for monuments */}
         <div className="w-3/4">
           <h2 className="text-2xl font-semibold mb-6">Monuments</h2>
-          <div className="search-results-block">
+          <div className="search-results-block mb-6">
             {monuments.length > 0 ? (
               monuments.map((monument) => (
                 <div key={monument.id} className="monument-card p-4 border border-gray-300 rounded shadow-md mb-4 flex">
@@ -177,10 +202,18 @@ const UserDashboard = () => {
               <p className="text-gray-500">No monuments found for the selected filters.</p>
             )}
           </div>
+
+          {/* Export to CSV Button */}
+          <button
+            className="bg-red-600 text-white p-2 rounded hover:bg-red-700 transition duration-200"
+            onClick={exportToCSV}
+          >
+            Export to CSV
+          </button>
         </div>
       </div>
     </>
   );
 };
 
-export default UserDashboard;
+export default UserDashboard;
